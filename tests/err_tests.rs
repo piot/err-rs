@@ -3,7 +3,19 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-use err_rs::{most_severe_error, ErrorLevel};
+use err_rs::{
+    most_severe_error, most_severe_error_provider, most_severe_level, ErrorLevel,
+    ErrorLevelProvider,
+};
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct TestErrorProvider(pub ErrorLevel);
+
+impl ErrorLevelProvider for TestErrorProvider {
+    fn error_level(&self) -> ErrorLevel {
+        self.0
+    }
+}
 
 #[test]
 fn manual_severe_level() {
@@ -15,7 +27,29 @@ fn manual_severe_level() {
 
 #[test]
 fn severe_level() {
-    let worst = most_severe_error(&[ErrorLevel::Critical, ErrorLevel::Info, ErrorLevel::Warning])
+    let worst = most_severe_level(&[ErrorLevel::Critical, ErrorLevel::Info, ErrorLevel::Warning])
         .expect("should be a most severe");
     assert_eq!(worst, ErrorLevel::Critical);
+}
+
+#[test]
+fn severe_error() {
+    let worst = most_severe_error(&[
+        TestErrorProvider(ErrorLevel::Critical),
+        TestErrorProvider(ErrorLevel::Info),
+        TestErrorProvider(ErrorLevel::Warning),
+    ])
+    .expect("should be a most severe");
+    assert_eq!(worst, ErrorLevel::Critical);
+}
+
+#[test]
+fn severe_error_provider() {
+    let worst = most_severe_error_provider(&[
+        &TestErrorProvider(ErrorLevel::Info),
+        &TestErrorProvider(ErrorLevel::Critical),
+        &TestErrorProvider(ErrorLevel::Warning),
+    ])
+    .expect("should be a most severe");
+    assert_eq!(worst, &TestErrorProvider(ErrorLevel::Critical));
 }
