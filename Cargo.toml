@@ -3,7 +3,7 @@ name = "err-rs"
 version = "0.0.3"
 edition = "2021"
 license = "MIT"
-description = "Error utilities"
+description = "Error level management"
 repository = "https://github.com/piot/err-rs"
 
 [dependencies]
